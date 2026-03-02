@@ -296,6 +296,9 @@ func (mc *MinerConn) handle() {
 			if mc.ctx.Err() != nil {
 				return
 			}
+			if errors.Is(err, net.ErrClosed) || errors.Is(err, io.ErrClosedPipe) {
+				return
+			}
 			logger.Error("set read deadline failed", "component", "miner", "kind", "io", "remote", mc.id, "error", err)
 			return
 		}
