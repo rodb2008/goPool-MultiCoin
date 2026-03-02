@@ -30,6 +30,7 @@ func (jm *JobManager) buildJob(ctx context.Context, tpl GetBlockTemplateResult) 
 	if err != nil {
 		return nil, err
 	}
+	tpl.Version = applyConfiguredVersionBits(tpl.Version, jm.cfg)
 
 	merkleBranches := buildMerkleBranches(txids)
 	merkleBranchesBytes, err := decodeMerkleBranchesBytes(merkleBranches)

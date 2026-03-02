@@ -187,6 +187,7 @@ type AdminSettingsData struct {
 	ShareNTimeMaxForwardSeconds         int
 	MinVersionBits                      int
 	ShareAllowDegradedVersionBits       bool
+	BIP110Enabled                       bool
 }
 
 type AdminMinerRow struct {

@@ -199,6 +199,7 @@ type banTuning struct {
 type versionTuning struct {
 	MinVersionBits                *int  `toml:"min_version_bits"`
 	ShareAllowDegradedVersionBits *bool `toml:"share_allow_degraded_version_bits"`
+	BIP110Enabled                 *bool `toml:"bip110_enabled"`
 }
 
 // fileOverrideConfig groups override sections used internally when applying
@@ -263,6 +264,15 @@ type tuningFileConfig struct {
 	Hashrate     tuningHashrateConfig `toml:"hashrate"`
 	Stratum      tuningStratumConfig  `toml:"stratum"`
 	PeerCleaning peerCleaningTuning   `toml:"peer_cleaning"`
+}
+
+type versionBitOverride struct {
+	Bit     int  `toml:"bit"`
+	Enabled bool `toml:"enabled"`
+}
+
+type versionBitsFileConfig struct {
+	Bits []versionBitOverride `toml:"bits"`
 }
 
 // secretsConfig holds values from secrets.toml: Clerk secrets and (when enabled)

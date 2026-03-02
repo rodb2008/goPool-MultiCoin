@@ -74,10 +74,12 @@ func loadConfig(configPath, secretsPath string) (Config, string) {
 	}
 
 	// Optional advanced overlays. These files are intentionally absent by default.
+	// version_bits.toml is read-only (never rewritten by goPool).
 	configDir := filepath.Join(cfg.DataDir, "config")
 	servicesPath := filepath.Join(configDir, "services.toml")
 	policyPath := filepath.Join(configDir, "policy.toml")
 	tuningPath := filepath.Join(configDir, "tuning.toml")
+	versionBitsPath := filepath.Join(configDir, "version_bits.toml")
 	var runtimeOverrides fileOverrideConfig
 	var tuningConfigLoaded bool
 	var servicesConfigLoaded bool
@@ -98,6 +100,13 @@ func loadConfig(configPath, secretsPath string) (Config, string) {
 		applyTuningConfig(&cfg, *pf)
 		tuningConfigLoaded = true
 		runtimeOverrides.RateLimits = pf.RateLimits
+	}
+	if vf, ok, err := loadVersionBitsFile(versionBitsPath); err != nil {
+		fatal("version bits config file", err, "path", versionBitsPath)
+	} else if ok {
+		if err := applyVersionBitsConfig(&cfg, *vf); err != nil {
+			fatal("version bits config file", err, "path", versionBitsPath)
+		}
 	}
 
 	// Sanitize payout address to strip stray whitespace or unexpected
@@ -156,6 +165,23 @@ func loadTuningFile(path string) (*tuningFileConfig, bool, error) {
 
 func loadSecretsFile(path string) (*secretsConfig, bool, error) {
 	return loadTOMLFile[secretsConfig](path)
+}
+
+func loadVersionBitsFile(path string) (*versionBitsFileConfig, bool, error) {
+	return loadTOMLFile[versionBitsFileConfig](path)
+}
+
+func applyVersionBitsConfig(cfg *Config, fc versionBitsFileConfig) error {
+	if cfg.VersionBitOverrides == nil {
+		cfg.VersionBitOverrides = make(map[uint32]bool)
+	}
+	for i, entry := range fc.Bits {
+		if entry.Bit < 0 || entry.Bit > 31 {
+			return fmt.Errorf("bits[%d].bit must be between 0 and 31", i)
+		}
+		cfg.VersionBitOverrides[uint32(entry.Bit)] = entry.Enabled
+	}
+	return nil
 }
 
 func ensureSecretFilePermissions(path string) {
@@ -554,6 +580,9 @@ func applyFileOverrides(cfg *Config, fc fileOverrideConfig) {
 	}
 	if fc.Version.ShareAllowDegradedVersionBits != nil {
 		cfg.ShareAllowDegradedVersionBits = *fc.Version.ShareAllowDegradedVersionBits
+	}
+	if fc.Version.BIP110Enabled != nil {
+		cfg.BIP110Enabled = *fc.Version.BIP110Enabled
 	}
 }
 

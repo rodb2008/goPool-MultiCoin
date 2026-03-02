@@ -107,6 +107,7 @@ func buildPolicyFileConfig(cfg Config) policyFileConfig {
 		Version: versionTuning{
 			MinVersionBits:                new(cfg.MinVersionBits),
 			ShareAllowDegradedVersionBits: new(cfg.ShareAllowDegradedVersionBits),
+			BIP110Enabled:                 new(cfg.BIP110Enabled),
 		},
 		Bans: banTuning{
 			CleanExpiredOnStartup:            new(cfg.CleanExpiredBansOnStartup),
@@ -254,6 +255,7 @@ func (cfg Config) Effective() EffectiveConfig {
 		VersionMask:                       uint32ToHex8Lower(cfg.VersionMask),
 		MinVersionBits:                    cfg.MinVersionBits,
 		ShareAllowDegradedVersionBits:     cfg.ShareAllowDegradedVersionBits,
+		BIP110Enabled:                     cfg.BIP110Enabled,
 		MaxDifficulty:                     cfg.MaxDifficulty,
 		MinDifficulty:                     cfg.MinDifficulty,
 		TargetSharesPerMin:                cfg.TargetSharesPerMin,

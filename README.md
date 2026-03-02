@@ -47,6 +47,7 @@ Counts above were collected on March 1, 2026.
   - `data/config/services.toml` for service/integration settings (`auth`, `backblaze_backup`, `discord`, `status` links).
   - `data/config/policy.toml` for submit-policy/version/bans/timeouts.
   - `data/config/tuning.toml` for rate limits, vardiff, EMA tuning, and peer-cleaning controls.
+  - `data/config/version_bits.toml` for explicit per-bit block-version overrides (read-only; never rewritten by goPool). `data/config/policy.toml` `[version].bip110_enabled` toggles BIP-110 signaling (bit 4), and `version_bits.toml` can still force bit-level overrides afterward. BIP-110 reference: https://github.com/bitcoin/bips/blob/master/bip-0110.mediawiki
   - `data/config/secrets.toml` for sensitive credentials (RPC user/pass, Discord/Clerk secrets, Backblaze keys).
 - `data/config/admin.toml` controls the optional admin UI at `/admin`. The file is auto-generated on first run with `enabled = false` and a random password (read the file to see the generated secret). Update it to enable the panel, pick fresh credentials, and keep the file private. goPool writes `password_sha256` on startup and clears the plaintext password after the first successful login; subsequent logins use the hash. The admin UI provides a field-based editor for the in-memory config, can force-write `config.toml` + split override files, and includes a reboot control; reboot requests require typing `REBOOT` and resubmitting the admin password.
 - `[logging]` uses boolean toggles: `debug` enables verbose runtime logs, and `net_debug` enables raw network tracing (`net-debug.log`). You can also force these at startup with `-debug` and `-net-debug`.
@@ -68,6 +69,7 @@ Flags like `-network`, `-rpc-url`, `-rpc-cookie`, and `-secrets` override the co
 
 - **`documentation/README.md`** - Documentation index.
 - **`documentation/operations.md`** – Main reference for configuration options, CLI flags, logging, backup policies, and runtime procedures.
+- **`documentation/version-bits.md`** – Version-bit override file format and known bit usage in goPool.
 - **`documentation/json-apis.md`** – HTTP JSON API reference for the `/api/*` status endpoints.
 - **`documentation/TESTING.md`** – Test suite instructions and how to add or run existing tests.
 - **`LICENSE`** – Legal terms for using goPool.

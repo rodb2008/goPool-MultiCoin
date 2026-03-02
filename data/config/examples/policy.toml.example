@@ -19,6 +19,10 @@
 # Version policy ([version])
 # - min_version_bits
 # - share_allow_degraded_version_bits
+# - bip110_enabled: set BIP-110 signaling bit 4 on generated templates.
+#   Reference: https://github.com/bitcoin/bips/blob/master/bip-0110.mediawiki
+#   Note: version_bits.toml is applied after this flag and can still force
+#   bit 4 on/off.
 #
 # Timeouts ([timeouts])
 # - connection_timeout_seconds
@@ -57,5 +61,9 @@
   connection_timeout_seconds = 180
 
 [version]
+  # BIP-110 reference:
+  # https://github.com/bitcoin/bips/blob/master/bip-0110.mediawiki
+  # Note: version_bits.toml overrides are applied after this flag.
+  bip110_enabled = false
   min_version_bits = 1
   share_allow_degraded_version_bits = true
