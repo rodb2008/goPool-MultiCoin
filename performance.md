@@ -70,6 +70,36 @@ Using the benchmark's built-in conversion at **15 shares/min per miner**:
 - Practical target from full submit+process path (70% headroom): **~5.09 million miners**
 - Peak benchmark-only ceiling (no headroom): **~7.46 million miners**
 
+## Estimated Network Bandwidth (1GbE vs 10GbE)
+
+Assumptions used for share traffic sizing:
+
+- Submit request sample size from `miner_decode_bench_test.go`: **100 bytes** (including newline)
+- Successful submit response (`{"id":1,"result":true,"error":null}\n`): **36 bytes**
+- Total application payload per accepted share round trip: **136 bytes/share**
+- Protocol overhead factor (TCP/IP/Ethernet framing, ACKs, etc.): **1.2x**
+- Share rate used by capacity benchmarks: **15 shares/min per miner** (`0.25 shares/s`)
+
+Derived per-miner bandwidth:
+
+- `0.25 * 136 * 8 * 1.2 = 326.4 bps` per miner
+
+Estimated max miners by link speed (assuming ~94% usable line rate):
+
+- **1GbE (~940 Mbps usable): ~2,879,902 miners @ 15 spm**
+- **10GbE (~9.4 Gbps usable): ~28,799,020 miners @ 15 spm**
+
+Bandwidth needed for the CPU-based miner estimates above:
+
+- Conservative CPU estimate (~3.08M miners): **~1.01 Gbps**
+- Practical CPU estimate (~5.09M miners): **~1.66 Gbps**
+- Peak benchmark-only CPU ceiling (~7.46M miners): **~2.43 Gbps**
+
+Implication:
+
+- With a **1GbE** NIC, networking is the bottleneck before the practical CPU limit.
+- With a **10GbE** NIC, CPU/system overhead becomes the bottleneck first (for these measured paths).
+
 ## Recommendation
 
 For capacity planning on this host CPU, use **~5.0 million miners @ 15 shares/min** as a practical CPU estimate, and **~3.0 million** as a stricter conservative floor when reserving more operational safety margin.
