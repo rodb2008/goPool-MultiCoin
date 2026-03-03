@@ -6,7 +6,53 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/Distortions81/M45-Core-goPool)](https://go.dev)
 [![License](https://img.shields.io/github/license/Distortions81/M45-Core-goPool)](https://github.com/Distortions81/M45-Core-goPool/blob/main/LICENSE)
 
-goPool is a solo Bitcoin mining pool that connects directly to Bitcoin Core over JSON-RPC and ZMQ, exposes Stratum v1 (with optional TLS), and ships with a status UI + JSON APIs for monitoring.
+goPool is a **from-scratch Golang solo Bitcoin mining pool**. It connects directly to Bitcoin Core over JSON-RPC and ZMQ, exposes Stratum v1 (with optional TLS), and ships with a status UI + JSON APIs for monitoring.
+
+## What this project is
+
+- A solo Bitcoin pool server written in Go from the ground up for this project.
+- A direct integration with Bitcoin Core (no external pool engine dependency).
+- A self-hosted stack: Stratum endpoint, web status UI, and JSON APIs.
+
+## Feature highlights
+
+- **Solo mining core**: builds and submits Bitcoin blocks directly against Bitcoin Core (`getblocktemplate` + `submitblock`) with JSON-RPC and optional ZMQ acceleration.
+- **Stratum v1 server**: supports `mining.subscribe`, `mining.authorize`, `mining.submit`, `mining.configure`, CKPool-style `mining.auth`, and optional Stratum TLS.
+- **Compatibility controls**: CKPool subscribe-response emulation, version-rolling support, suggest-difficulty handling, optional `mining.set_extranonce` and `mining.set_version_mask` notifications.
+- **Share-policy controls**: duplicate checks, nTime and version-rolling checks, worker-match enforcement, stale-job freshness modes, and optional inline submit processing.
+- **VarDiff + hashrate telemetry**: configurable difficulty clamps/targets, EMA smoothing, worker/pool hashrate history, and best-share tracking.
+- **Safety and resilience**: node/job-feed health gating (disconnect/refuse when unsafe), reconnect/invalid-submit banning, pending submission replay, and stale-feed safeguards.
+- **Web status UI + JSON APIs**: live overview, node/pool/server pages, worker pages, and `/api/*` endpoints for monitoring/automation.
+- **Operator controls**: optional admin panel for live settings updates, persist-to-disk controls, log tooling, and guarded reboot action.
+- **Storage and backups**: SQLite state store with atomic snapshots and optional Backblaze B2 upload workflow.
+- **Auth/integrations**: optional Clerk auth flows, saved-worker pages, Discord notification toggles, and one-time worker linking codes.
+- **Performance options**: fast-path Stratum decode/encode toggles, socket buffer tuning, optional SIMD JSON/hash paths, and built-in profiling hooks.
+
+## Direct Go libraries and licenses
+
+The table below lists direct Go module dependencies from `go.mod` and the license declared in each dependency's upstream `LICENSE*` file.
+
+| Library | Version | License |
+|---|---:|---|
+| github.com/Backblaze/blazer | v0.7.2 | Apache-2.0 |
+| github.com/btcsuite/btcd | v0.25.0 | ISC |
+| github.com/btcsuite/btcd/btcec/v2 | v2.3.6 | ISC |
+| github.com/btcsuite/btcd/btcutil | v1.1.6 | ISC |
+| github.com/btcsuite/btcd/chaincfg/chainhash | v1.1.0 | ISC |
+| github.com/bwmarrin/discordgo | v0.29.0 | BSD-3-Clause |
+| github.com/bytedance/sonic | v1.15.0 | Apache-2.0 |
+| github.com/clerk/clerk-sdk-go/v2 | v2.5.1 | MIT |
+| github.com/golang-jwt/jwt/v5 | v5.3.0 | MIT |
+| github.com/hako/durafmt | v0.0.0-20210608085754-5c1018a4e16b | MIT |
+| github.com/martinhoefling/goxkcdpwgen | v0.1.1 | MIT |
+| github.com/minio/sha256-simd | v1.0.1 | Apache-2.0 |
+| github.com/pebbe/zmq4 | v1.4.0 | BSD-3-Clause |
+| github.com/pelletier/go-toml | v1.9.5 | Apache-2.0 |
+| github.com/remeh/sizedwaitgroup | v1.0.0 | MIT |
+| golang.org/x/sys | v0.40.0 | BSD-3-Clause |
+| modernc.org/sqlite | v1.44.1 | BSD-3-Clause |
+
+Additional third-party asset notices are in `THIRD_PARTY_NOTICES.md`.
 
 > **Downloads:** Pre-built binaries are available on GitHub Releases.
 

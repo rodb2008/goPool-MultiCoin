@@ -42,14 +42,15 @@ go build -ldflags="-X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ) -X main.buil
 
 Both values appear on the status page and JSON endpoints so you can verify the exact build at runtime.
 
-## Initial configuration
+## Starting the pool
 
-1. Run `./goPool`; it generates `data/config/examples/` and exits.
-2. Copy the base example to `data/config/config.toml` and edit required values (especially `node.payout_address`, `node.rpc_url`, and ZMQ addresses: `node.zmq_hashblock_addr`/`node.zmq_rawblock_addr`—leave blank to fall back to RPC/longpoll).
-3. Optional: copy `data/config/examples/secrets.toml.example`, `data/config/examples/services.toml.example`, `data/config/examples/policy.toml.example`, `data/config/examples/tuning.toml.example`, and `data/config/examples/version_bits.toml.example` to `data/config/` for sensitive credentials or advanced tuning.
-4. Re-run `./goPool`; it may regenerate `pool_entropy` and normalized listener ports if you later invoke `./goPool -rewrite-config`.
+1. Run `./goPool` once; it generates `data/config/examples/` and exits.
+2. Copy `data/config/examples/config.toml.example` to `data/config/config.toml`.
+3. Set required values in `config.toml` (especially `node.payout_address`, `node.rpc_url`, and optional `node.zmq_hashblock_addr`/`node.zmq_rawblock_addr`).
+4. Optional: copy split files from `data/config/examples/` into `data/config/` (`secrets.toml`, `services.toml`, `policy.toml`, `tuning.toml`, `version_bits.toml`) when you need overrides.
+5. Start goPool again with `./goPool`.
 
-## Runtime overrides
+## Runtime flags
 
 | Flag | Description |
 |------|-------------|
@@ -62,8 +63,17 @@ Both values appear on the status page and JSON endpoints so you can verify the e
 | `-rpc-url <url>` | Override `node.rpc_url` for this run—useful for temporary test nodes. |
 | `-rpc-cookie <path>` | Override `node.rpc_cookie_path` when testing alternate cookie locations. |
 | `-data-dir <path>` | Override the data directory (logs/state/config/examples) for this run. |
+| `-log-dir <path>` | Override directory for pool/debug/net-debug logs only. |
+| `-pool-log <path>` | Override pool log file path. |
+| `-debug-log <path>` | Override debug log file path. |
+| `-net-debug-log <path>` | Override net-debug log file path. |
 | `-max-conns <n>` | Override max concurrent miner connections (`-1` keeps configured value). |
 | `-safe-mode <true|false>` | Force conservative compatibility/safety settings (can disable fast-path tuning and automatic bans). |
+| `-ckpool-emulate <true|false>` | Override CKPool-style Stratum subscribe response shape. |
+| `-stratum-fast-decode <true|false>` | Override fast-path Stratum decode/sniffing behavior. |
+| `-stratum-fast-encode <true|false>` | Override fast-path Stratum response encoding behavior. |
+| `-stratum-tcp-read-buffer <bytes>` | Override Stratum TCP read buffer bytes (`0` uses OS default). |
+| `-stratum-tcp-write-buffer <bytes>` | Override Stratum TCP write buffer bytes (`0` uses OS default). |
 | `-secrets <path>` | Point to an alternate `secrets.toml`; the file is not rewritten. |
 | `-rewrite-config` | Persist derived values like `pool_entropy` back into `config.toml`. |
 | `-stdout` | Mirror every structured log entry to stdout (nice when running under systemd/journal). |
@@ -74,49 +84,10 @@ Both values appear on the status page and JSON endpoints so you can verify the e
 | `-allow-public-rpc` | Allow connecting to an unauthenticated RPC endpoint (testing only). |
 | `-allow-rpc-creds` | Force username/password auth from `secrets.toml`; logs a warning and is deprecated. |
 | `-backup-on-boot` | Run one forced database backup pass at startup (best-effort). |
+| `-miner-profile-json <path>` | Write aggregated miner profile JSON to a file for offline tuning. |
 | `-saved-workers-local-noauth` | Allow saved-worker pages without Clerk auth (local single-user mode). |
 
 Flags only override values for the running instance; nothing is written back to `config.toml` (except `node.rpc_cookie_path` when auto-detected). Use configuration files for durable behavior.
-
-## Launching goPool
-
-### Initial run
-
-1. Run `./goPool` once without a config. The daemon stops after generating `data/config/examples/`.
-2. Copy `data/config/examples/config.toml.example` to `data/config/config.toml`.
-3. Provide the required values (payout address, RPC/ZMQ endpoints, any branding overrides) and restart the pool.
-4. Optional: copy `data/config/examples/secrets.toml.example`, `data/config/examples/services.toml.example`, `data/config/examples/policy.toml.example`, `data/config/examples/tuning.toml.example`, and `data/config/examples/version_bits.toml.example` to `data/config/` and edit as needed.
-5. If you prefer reproducible derived settings, rerun `./goPool -rewrite-config` once after editing. This writes derived fields such as `pool_entropy` and normalized listener ports back to `config.toml`.
-
-### Common runtime flags
-
-| Flag | Description |
-|------|-------------|
-| `-network <mainnet|testnet|signet|regtest>` | Force network defaults for RPC/ZMQ ports and version mask adjustments. Only one mode is accepted. |
-| `-bind <ip>` | Override the bind IP for all listeners (Stratum, status UI). Ports remain as configured. |
-| `-listen <addr>` | Override Stratum TCP listen address for this run. |
-| `-status <addr>` | Override status HTTP listen address for this run. |
-| `-status-tls <addr>` | Override status HTTPS listen address for this run. |
-| `-stratum-tls <addr>` | Override Stratum TLS listen address for this run. |
-| `-rpc-url <url>` | Override the RPC URL defined in `config.toml`. |
-| `-rpc-cookie <path>` | Override the RPC cookie path; useful for temporary deployments while keeping `config.toml` untouched. |
-| `-data-dir <path>` | Override the data directory used for config/state/logs for this run. |
-| `-max-conns <n>` | Override maximum concurrent miner connections (`-1` keeps config value). |
-| `-secrets <path>` | Use an alternative `secrets.toml` location (defaults to `data/config/secrets.toml`). |
-| `-stdout` | Mirror structured logs to stdout in addition to the rolling files. |
-| `-profile` | Write a CPU profile to `default.pgo` for offline `pprof` analysis. |
-| `-rewrite-config` | Rewrite `config.toml` after applying runtime overrides (reorders sections and fills derived values). |
-| `-flood` | Force `min_difficulty`/`max_difficulty` to the same low value for stress testing. |
-| `-safe-mode <true|false>` | Toggle conservative compatibility/safety mode for this run. |
-| `-debug` / `-net-debug` | Force debug logging and raw network tracing at startup. |
-| `-no-json` | Disable the JSON status endpoints (you still get the HTML status UI). |
-| `-allow-public-rpc` | Allow connecting to an unauthenticated RPC endpoint (testing only). |
-| `-allow-rpc-creds` | Force RPC auth to come from `secrets.toml` `rpc_user`/`rpc_pass`. Deprecated and insecure; prefer cookie auth. |
-| `-backup-on-boot` | Force one startup backup run (best-effort). |
-| `-saved-workers-local-noauth` | Disable Clerk auth requirement for saved-worker pages (local single-user mode). |
-
-Additional runtime knobs exist in `config.toml` plus optional `services.toml`/`policy.toml`/`tuning.toml`, but the flags above let you temporarily override them without editing files.
-Flags such as `-network`, `-rpc-url`, `-rpc-cookie`, `-allow-public-rpc`, and `-secrets` only affect the current invocation; they override the values from `config.toml` or `secrets.toml` at runtime but are not persisted back to the files.
 
 ## Configuration files
 

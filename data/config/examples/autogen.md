@@ -41,12 +41,12 @@ cp data/config/examples/services.toml.example data/config/services.toml
 - **Examples are regenerated:** Example files are recreated on each startup to reflect current defaults
 - **Don't edit examples:** Your changes to `.example` files will be lost on restart
 - **Actual configs are protected:** Your configuration files in `data/config/` are gitignored and never overwritten
-- **Cookie authentication preferred:** RPC credentials in `secrets.toml` only work with the `-allow-rpc-credentials` flag. Prefer setting `node.rpc_cookie_path` in `config.toml` for secure cookie-based authentication
+- **Cookie authentication preferred:** RPC credentials in `secrets.toml` only work with the `-allow-rpc-creds` flag. Prefer setting `node.rpc_cookie_path` in `config.toml` for secure cookie-based authentication
 
 ## Authentication Priority
 
 1. **Cookie file** (recommended) - Set `node.rpc_cookie_path` in `config.toml`
 2. **Auto-detection** - goPool searches common locations if `rpc_cookie_path` is empty
-3. **Username/password** (deprecated) - Use `rpc_user`/`rpc_pass` in `secrets.toml` with `-allow-rpc-credentials` flag
+3. **Username/password** (deprecated) - Use `rpc_user`/`rpc_pass` in `secrets.toml` with `-allow-rpc-creds` flag
 
 See [operations.md](../../../documentation/operations.md) for detailed configuration options.
