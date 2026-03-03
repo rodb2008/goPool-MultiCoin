@@ -64,7 +64,7 @@ func defaultConfig() Config {
 		ConnectionTimeout:                   defaultConnectionTimeout,
 		VersionMask:                         defaultVersionMask,
 		MinVersionBits:                      defaultMinVersionBits,
-		ShareAllowVersionMaskMismatch:       true,
+		ShareAllowVersionMaskMismatch:       false,
 		ShareAllowDegradedVersionBits:       true,
 		BIP110Enabled:                       false,
 		VersionBitOverrides:                 nil,

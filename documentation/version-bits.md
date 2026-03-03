@@ -61,9 +61,9 @@ goPool applies version changes in this order:
 goPool rejects miner-submitted version changes outside the negotiated
 version-rolling mask:
 
-- `true` (default): allow out-of-mask submits for compatibility (for example
+- `true`: allow out-of-mask submits for compatibility (for example
   miners signaling BIP-110 bit 4).
-- `false`: strict mask enforcement (`invalid version mask` policy reject on
+- `false` (default): strict mask enforcement (`invalid version mask` policy reject on
   non-block shares).
 
 ## Bitcoin version bits reference

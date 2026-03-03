@@ -581,7 +581,7 @@ func TestPrepareSubmissionTask_VersionRollingPolicyBoundaries(t *testing.T) {
 		}
 	})
 
-	t.Run("version outside mask allowed by default compatibility mode", func(t *testing.T) {
+	t.Run("version outside mask allowed when compatibility mode enabled", func(t *testing.T) {
 		mc, req := newVersionReq("00000010")
 		mc.minVerBits = 0
 		mc.cfg.ShareAllowVersionMaskMismatch = true
