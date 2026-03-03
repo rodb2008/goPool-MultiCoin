@@ -2,7 +2,7 @@
 
 [![Go CI](https://github.com/Distortions81/M45-Core-goPool/actions/workflows/ci.yml/badge.svg)](https://github.com/Distortions81/M45-Core-goPool/actions/workflows/ci.yml)
 [![Go Vulncheck](https://github.com/Distortions81/M45-Core-goPool/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/Distortions81/M45-Core-goPool/actions/workflows/govulncheck.yml)
-[![Coverage](https://codecov.io/gh/Distortions81/M45-Core-goPool/branch/main/graph/badge.svg)](https://codecov.io/gh/Distortions81/M45-Core-goPool/tree/main)
+[![Coverage](https://codecov.io/github/Distortions81/M45-Core-goPool/graph/badge.svg)](https://app.codecov.io/github/Distortions81/M45-Core-goPool)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Distortions81/M45-Core-goPool)](https://go.dev)
 [![License](https://img.shields.io/github/license/Distortions81/M45-Core-goPool)](https://github.com/Distortions81/M45-Core-goPool/blob/main/LICENSE)
 
