@@ -495,9 +495,16 @@ func (mc *MinerConn) prepareSubmissionTaskFromParsedBytes(reqID any, params subm
 		}
 
 		if versionDiff&^mc.versionMask != 0 {
-			logger.Warn("submit version outside mask (policy)", "remote", mc.id, "version", uint32ToHex8Lower(useVersion), "mask", uint32ToHex8Lower(mc.versionMask))
-			if policyReject.reason == rejectUnknown {
-				policyReject = submitPolicyReject{reason: rejectInvalidVersionMask, errCode: stratumErrCodeInvalidRequest, errMsg: "invalid version mask"}
+			if !mc.cfg.ShareAllowVersionMaskMismatch {
+				logger.Warn("submit version outside mask (policy)", "remote", mc.id, "version", uint32ToHex8Lower(useVersion), "mask", uint32ToHex8Lower(mc.versionMask))
+				if policyReject.reason == rejectUnknown {
+					policyReject = submitPolicyReject{reason: rejectInvalidVersionMask, errCode: stratumErrCodeInvalidRequest, errMsg: "invalid version mask"}
+				}
+			} else {
+				logger.Debug("submit version outside mask allowed (compat)",
+					"remote", mc.id,
+					"version", uint32ToHex8Lower(useVersion),
+					"mask", uint32ToHex8Lower(mc.versionMask))
 			}
 		}
 
@@ -699,9 +706,16 @@ func (mc *MinerConn) prepareSubmissionTaskFromParsed(reqID any, params submitPar
 		}
 
 		if versionDiff&^mc.versionMask != 0 {
-			logger.Warn("submit version outside mask (policy)", "remote", mc.id, "version", uint32ToHex8Lower(useVersion), "mask", uint32ToHex8Lower(mc.versionMask))
-			if policyReject.reason == rejectUnknown {
-				policyReject = submitPolicyReject{reason: rejectInvalidVersionMask, errCode: stratumErrCodeInvalidRequest, errMsg: "invalid version mask"}
+			if !mc.cfg.ShareAllowVersionMaskMismatch {
+				logger.Warn("submit version outside mask (policy)", "remote", mc.id, "version", uint32ToHex8Lower(useVersion), "mask", uint32ToHex8Lower(mc.versionMask))
+				if policyReject.reason == rejectUnknown {
+					policyReject = submitPolicyReject{reason: rejectInvalidVersionMask, errCode: stratumErrCodeInvalidRequest, errMsg: "invalid version mask"}
+				}
+			} else {
+				logger.Debug("submit version outside mask allowed (compat)",
+					"remote", mc.id,
+					"version", uint32ToHex8Lower(useVersion),
+					"mask", uint32ToHex8Lower(mc.versionMask))
 			}
 		}
 

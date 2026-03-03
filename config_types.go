@@ -141,7 +141,10 @@ type Config struct {
 	ConnectionTimeout             time.Duration
 	VersionMask                   uint32
 	MinVersionBits                int
+	ShareAllowVersionMaskMismatch bool
 	ShareAllowDegradedVersionBits bool
+	BIP110Enabled                 bool
+	VersionBitOverrides           map[uint32]bool
 	VersionMaskConfigured         bool
 	MaxDifficulty                 float64
 	MinDifficulty                 float64
@@ -257,7 +260,9 @@ type EffectiveConfig struct {
 	ConnectionTimeout                 string   `json:"connection_timeout"`
 	VersionMask                       string   `json:"version_mask,omitempty"`
 	MinVersionBits                    int      `json:"min_version_bits,omitempty"`
+	ShareAllowVersionMaskMismatch     bool     `json:"share_allow_version_mask_mismatch,omitempty"`
 	ShareAllowDegradedVersionBits     bool     `json:"share_allow_degraded_version_bits,omitempty"`
+	BIP110Enabled                     bool     `json:"bip110_enabled,omitempty"`
 	MaxDifficulty                     float64  `json:"max_difficulty,omitempty"`
 	MinDifficulty                     float64  `json:"min_difficulty,omitempty"`
 	TargetSharesPerMin                float64  `json:"target_shares_per_min,omitempty"`

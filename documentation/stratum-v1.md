@@ -26,6 +26,7 @@ Code pointers:
   - Alias for `mining.authorize` (CKPool compatibility).
 - `mining.submit`
   - Standard 5 params plus an optional 6th `version` field (used for version-rolling support).
+  - Version policy can be relaxed with `policy.toml [version].share_allow_version_mask_mismatch = true`, which allows out-of-mask version bits for compatibility (for example BIP-110 bit 4 signaling). Default is `false`.
 - `mining.ping` (and `client.ping`)
   - Replies with `"pong"`.
 - `client.get_version`

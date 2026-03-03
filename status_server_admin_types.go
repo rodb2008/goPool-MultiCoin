@@ -186,7 +186,9 @@ type AdminSettingsData struct {
 	HashrateRecentCumulativeEnabled     bool
 	ShareNTimeMaxForwardSeconds         int
 	MinVersionBits                      int
+	ShareAllowVersionMaskMismatch       bool
 	ShareAllowDegradedVersionBits       bool
+	BIP110Enabled                       bool
 }
 
 type AdminMinerRow struct {

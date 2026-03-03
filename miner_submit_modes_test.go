@@ -571,12 +571,26 @@ func TestPrepareSubmissionTask_VersionRollingPolicyBoundaries(t *testing.T) {
 	t.Run("version outside mask rejected by policy", func(t *testing.T) {
 		mc, req := newVersionReq("00000010")
 		mc.minVerBits = 0
+		mc.cfg.ShareAllowVersionMaskMismatch = false
 		task, ok := mc.prepareSubmissionTask(req, time.Now())
 		if !ok {
 			t.Fatalf("expected out-of-mask version to be policy-only reject")
 		}
 		if task.policyReject.reason != rejectInvalidVersionMask {
 			t.Fatalf("got policy=%v want %v", task.policyReject.reason, rejectInvalidVersionMask)
+		}
+	})
+
+	t.Run("version outside mask allowed when compatibility mode enabled", func(t *testing.T) {
+		mc, req := newVersionReq("00000010")
+		mc.minVerBits = 0
+		mc.cfg.ShareAllowVersionMaskMismatch = true
+		task, ok := mc.prepareSubmissionTask(req, time.Now())
+		if !ok {
+			t.Fatalf("expected out-of-mask version to remain processable when compatibility mode is enabled")
+		}
+		if task.policyReject.reason != rejectUnknown {
+			t.Fatalf("unexpected policy reject: %+v", task.policyReject)
 		}
 	})
 
@@ -780,9 +794,28 @@ func TestPrepareSubmissionTaskFastBytes_Parity_FieldValidationAndBoundaries(t *t
 			wantUseVersion:   0,
 		},
 		{
+			name: "version outside mask allowed in compatibility mode",
+			configure: func(mc *MinerConn, _ *Job) {
+				mc.cfg.ShareCheckVersionRolling = true
+				mc.cfg.ShareAllowVersionMaskMismatch = true
+				mc.versionMask = 0x0000000f
+				mc.versionRoll = true
+				mc.minVerBits = 0
+			},
+			mutateReq: func(req *StratumRequest) {
+				req.Params = append(req.Params, "00000010")
+			},
+			wantOK:           true,
+			wantPolicyReason: rejectUnknown,
+			wantNTime:        1700000000,
+			wantNonce:        1,
+			wantUseVersion:   0x10,
+		},
+		{
 			name: "version outside mask policy reject",
 			configure: func(mc *MinerConn, _ *Job) {
 				mc.cfg.ShareCheckVersionRolling = true
+				mc.cfg.ShareAllowVersionMaskMismatch = false
 				mc.versionMask = 0x0000000f
 				mc.versionRoll = true
 				mc.minVerBits = 0

@@ -131,3 +131,73 @@ func TestApplyAdminSettingsForm_DisableConnectRateLimitsToggle(t *testing.T) {
 		t.Fatalf("expected disable_connect_rate_limits to be disabled when omitted")
 	}
 }
+
+func TestApplyAdminSettingsForm_BIP110EnabledToggle(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.BIP110Enabled = false
+
+	form := url.Values{}
+	form.Set("status_tagline", cfg.StatusTagline)
+	form.Set("bip110_enabled", "1")
+	r := httptest.NewRequest("POST", "/admin/apply", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if err := r.ParseForm(); err != nil {
+		t.Fatalf("ParseForm: %v", err)
+	}
+	if err := applyAdminSettingsForm(&cfg, r); err != nil {
+		t.Fatalf("applyAdminSettingsForm returned error: %v", err)
+	}
+	if !cfg.BIP110Enabled {
+		t.Fatalf("expected bip110_enabled to be enabled")
+	}
+
+	form = url.Values{}
+	form.Set("status_tagline", cfg.StatusTagline)
+	// Omitted checkbox means disabled.
+	r = httptest.NewRequest("POST", "/admin/apply", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if err := r.ParseForm(); err != nil {
+		t.Fatalf("ParseForm: %v", err)
+	}
+	if err := applyAdminSettingsForm(&cfg, r); err != nil {
+		t.Fatalf("applyAdminSettingsForm returned error: %v", err)
+	}
+	if cfg.BIP110Enabled {
+		t.Fatalf("expected bip110_enabled to be disabled when omitted")
+	}
+}
+
+func TestApplyAdminSettingsForm_ShareAllowVersionMaskMismatchToggle(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.ShareAllowVersionMaskMismatch = false
+
+	form := url.Values{}
+	form.Set("status_tagline", cfg.StatusTagline)
+	form.Set("share_allow_version_mask_mismatch", "1")
+	r := httptest.NewRequest("POST", "/admin/apply", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if err := r.ParseForm(); err != nil {
+		t.Fatalf("ParseForm: %v", err)
+	}
+	if err := applyAdminSettingsForm(&cfg, r); err != nil {
+		t.Fatalf("applyAdminSettingsForm returned error: %v", err)
+	}
+	if !cfg.ShareAllowVersionMaskMismatch {
+		t.Fatalf("expected share_allow_version_mask_mismatch to be enabled")
+	}
+
+	form = url.Values{}
+	form.Set("status_tagline", cfg.StatusTagline)
+	// Omitted checkbox means disabled.
+	r = httptest.NewRequest("POST", "/admin/apply", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if err := r.ParseForm(); err != nil {
+		t.Fatalf("ParseForm: %v", err)
+	}
+	if err := applyAdminSettingsForm(&cfg, r); err != nil {
+		t.Fatalf("applyAdminSettingsForm returned error: %v", err)
+	}
+	if cfg.ShareAllowVersionMaskMismatch {
+		t.Fatalf("expected share_allow_version_mask_mismatch to be disabled when omitted")
+	}
+}

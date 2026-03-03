@@ -46,7 +46,7 @@ Both values appear on the status page and JSON endpoints so you can verify the e
 
 1. Run `./goPool`; it generates `data/config/examples/` and exits.
 2. Copy the base example to `data/config/config.toml` and edit required values (especially `node.payout_address`, `node.rpc_url`, and ZMQ addresses: `node.zmq_hashblock_addr`/`node.zmq_rawblock_addr`—leave blank to fall back to RPC/longpoll).
-3. Optional: copy `data/config/examples/secrets.toml.example`, `data/config/examples/services.toml.example`, `data/config/examples/policy.toml.example`, and `data/config/examples/tuning.toml.example` to `data/config/` for sensitive credentials or advanced tuning.
+3. Optional: copy `data/config/examples/secrets.toml.example`, `data/config/examples/services.toml.example`, `data/config/examples/policy.toml.example`, `data/config/examples/tuning.toml.example`, and `data/config/examples/version_bits.toml.example` to `data/config/` for sensitive credentials or advanced tuning.
 4. Re-run `./goPool`; it may regenerate `pool_entropy` and normalized listener ports if you later invoke `./goPool -rewrite-config`.
 
 ## Runtime overrides
@@ -85,7 +85,7 @@ Flags only override values for the running instance; nothing is written back to 
 1. Run `./goPool` once without a config. The daemon stops after generating `data/config/examples/`.
 2. Copy `data/config/examples/config.toml.example` to `data/config/config.toml`.
 3. Provide the required values (payout address, RPC/ZMQ endpoints, any branding overrides) and restart the pool.
-4. Optional: copy `data/config/examples/secrets.toml.example`, `data/config/examples/services.toml.example`, `data/config/examples/policy.toml.example`, and `data/config/examples/tuning.toml.example` to `data/config/` and edit as needed.
+4. Optional: copy `data/config/examples/secrets.toml.example`, `data/config/examples/services.toml.example`, `data/config/examples/policy.toml.example`, `data/config/examples/tuning.toml.example`, and `data/config/examples/version_bits.toml.example` to `data/config/` and edit as needed.
 5. If you prefer reproducible derived settings, rerun `./goPool -rewrite-config` once after editing. This writes derived fields such as `pool_entropy` and normalized listener ports back to `config.toml`.
 
 ### Common runtime flags
@@ -150,7 +150,8 @@ Optional split override files can layer advanced settings without touching the m
 - `[hashrate]`: `hashrate_ema_tau_seconds`, `share_ntime_max_forward_seconds`.
 - `[peer_cleaning]`: Enable/disable peer cleanup and tune thresholds.
 - `[bans]`: Ban thresholds/durations, `banned_miner_types` (disconnect miners by client ID on subscribe), and `clean_expired_on_startup` (defaults to `true`). Prefer `data/config/miner_blacklist.json` for client ID blacklist management; it overrides `banned_miner_types` when present. Set `clean_expired_on_startup = false` if you want to keep expired bans for inspection.
-- `[version]`: `min_version_bits` and `share_allow_degraded_version_bits`.
+- `[version]` in `policy.toml`: `min_version_bits`, `share_allow_version_mask_mismatch` (allows submits outside negotiated mask, useful for BIP-110 bit 4 signaling), `share_allow_degraded_version_bits`, and `bip110_enabled` (sets bit 4 on newly generated templates).
+- `version_bits.toml`: explicit `[[bits]]` overrides for block header version bits (`bit=<0..31>`, `enabled=true|false`). This file is read-only from goPool's perspective and is never rewritten. Overrides are applied after `bip110_enabled`, so `version_bits.toml` has final authority per bit.
 
 Keep these files absent to use built-in defaults. The first run creates examples under `data/config/examples/`.
 
@@ -321,7 +322,7 @@ Each override value logs when set, so goPool operators can audit what changed vi
 ## Runtime operations
 
 - **SIGUSR1** reloads the HTML templates under `data/templates/`. Errors (parse failures, missing files) are logged but the previous template set remains active so the site keeps serving—check `pool.log` if pages look odd after a reload.
-- **SIGUSR2** reloads `config.toml`, `secrets.toml`, `services.toml`, `policy.toml`, and `tuning.toml`, reapplies overrides, and updates the status server with the new config.
+- **SIGUSR2** reloads `config.toml`, `secrets.toml`, `services.toml`, `policy.toml`, `tuning.toml`, and `version_bits.toml`, reapplies overrides, and updates the status server with the new config.
 - **Shutdown** occurs on `SIGINT`/`SIGTERM`. goPool stops the status servers, Stratum listener, and pending replayers gracefully.
 - **TLS cert reloading** uses `certReloader` to monitor `data/tls_cert.pem`/`tls_key.pem` hourly. Certificate renewals (e.g., via certbot) are picked up without restarts.
 

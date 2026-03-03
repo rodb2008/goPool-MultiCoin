@@ -25,6 +25,7 @@ func ensureExampleFiles(dataDir string) {
 	ensureExampleFile(filepath.Join(examplesDir, "services.toml.example"), exampleServicesConfigBytes())
 	ensureExampleFile(filepath.Join(examplesDir, "policy.toml.example"), examplePolicyConfigBytes())
 	ensureExampleFile(filepath.Join(examplesDir, "tuning.toml.example"), exampleTuningConfigBytes())
+	ensureExampleFile(filepath.Join(examplesDir, "version_bits.toml.example"), exampleVersionBitsConfigBytes())
 }
 
 func ensureExampleFile(path string, contents []byte) {
@@ -182,7 +183,13 @@ func policyConfigDocComments() []byte {
 #
 # Version policy ([version])
 # - min_version_bits
+# - share_allow_version_mask_mismatch: allow miners to submit version bits
+#   outside the negotiated version-rolling mask (useful for BIP-110 bit 4 signaling).
 # - share_allow_degraded_version_bits
+# - bip110_enabled: set BIP-110 signaling bit 4 on generated templates.
+#   Reference: https://github.com/bitcoin/bips/blob/master/bip-0110.mediawiki
+#   Note: version_bits.toml is applied after this flag and can still force
+#   bit 4 on/off.
 #
 # Timeouts ([timeouts])
 # - connection_timeout_seconds
@@ -238,6 +245,46 @@ func exampleServicesConfigBytes() []byte {
 		return nil
 	}
 	return withPrependedTOMLComments(data, exampleHeader("services config"), servicesConfigDocComments())
+}
+
+func exampleVersionBitsConfigBytes() []byte {
+	return []byte(`# Generated version bits config example (copy to ../version_bits.toml and edit as needed)
+#
+# This file is READ ONLY from goPool's perspective:
+# - goPool never rewrites version_bits.toml.
+# - Entries are applied in order; later entries for the same bit win.
+# - Overrides here are applied after policy.toml [version].bip110_enabled.
+#   If both touch bit 4, this file wins.
+#
+# Format:
+# [[bits]]
+#   bit = <0..31>
+#   enabled = true|false
+# Add one [[bits]] block per bit you want to override.
+# To set multiple bits, repeat [[bits]] for each bit.
+#
+# WARNING:
+# - Do not flip version bits unless you have a specific, validated reason.
+# - This file only modifies bits from the node's getblocktemplate version.
+# - In normal operation, leave node-provided bits unchanged.
+# - Improper changes can cause found (winning) blocks to be rejected.
+#
+# Example: force bit 5 on.
+#
+[[bits]]
+  bit = 5
+  enabled = true
+
+# Example: force bit 1 on.
+[[bits]]
+  bit = 1
+  enabled = true
+
+# Example: force bit 0 off.
+[[bits]]
+  bit = 0
+  enabled = false
+`)
 }
 
 func rewriteConfigFile(path string, cfg Config) error {
