@@ -129,6 +129,10 @@ func main() {
 
 	network := strings.ToLower(*networkFlag)
 
+	// This calls your new function in network_params.go
+	SetChainParams(network) 
+
+
 	overrides := runtimeOverrides{
 		bind:                *bindFlag,
 		listenAddr:          *listenFlag,
