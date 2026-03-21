@@ -1,4 +1,15 @@
 {{define "status_boxes"}}
+{{/* 1. Setup local variables - Corrected field names */}}
+{{$coin := "DGB"}}
+{{if .CoinSymbol}}
+    {{$coin = .CoinSymbol}}
+{{else if .BrandName}}
+    {{$coin = .BrandName}}
+{{end}}
+
+{{$fiat := "USD"}}
+{{if .FiatCurrency}}{{$fiat = .FiatCurrency}}{{end}}
+
 <div class="status-group">
 <div class="text-sm status-group-title">Pool</div>
 <div class="grid status-grid">
@@ -27,10 +38,6 @@
 		<div class="label">TRANSACTIONS REWARDS</div>
 		<div class="value mono" id="status-template-tx-fees">--</div>
 	</div>
-	{{/* <div class="card">
-		<div class="label">Next diff change</div>
-		<div class="value mono" id="status-block-height-context">--</div>
-	</div> */}}
 	<div class="card">
 		<div class="label">Pool tag</div>
 		<div class="value mono" id="status-pool-tag">--</div>
@@ -56,6 +63,7 @@
 	</div>
 </div>
 </div>
+
 <div class="status-group">
 <div class="text-sm status-group-title">NETWORK</div>
 <div class="grid status-grid">
@@ -67,18 +75,55 @@
 		<div class="label">Network difficulty</div>
 		<div class="value mono" id="status-block-difficulty">--</div>
 	</div>
-	{{/* <div class="card">
-		<div class="label">Next diff change</div>
-		<div class="value mono" id="status-block-height-context">--</div>
-	</div> */}}
 	<div class="card">
 		<div class="label">Block height</div>
 		<div class="value mono" id="status-block-height">--</div>
 	</div>
 	<div class="card">
-		<div class="label">BTC price</div>
-		<div class="value mono" id="status-btc-price">--</div>
-	</div>
+	    <div class="label">{{.CoinSymbol}} PRICE</div>
+	    <div class="value mono" id="status-btc-price">
+        	{{if gt .BTCPriceFiat 0.0}}
+	            {{.CoinSymbol}} ${{printf "%.4f" .BTCPriceFiat}} {{.FiatCurrency}}
+        	{{else}}
+	            --
+	        {{end}}
+	    </div>
+    </div>
 </div>
 </div>
+
+{{/* 2. THE SHIELD SCRIPT: Runs inside the template but only if not BTC */}}
+{{if ne $coin "BTC"}}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const coin = "{{$coin}}";
+        const fiat = "{{.FiatCurrency}}".toUpperCase() || "USD";
+
+        const fixAltcoinUI = () => {
+            // Fetch High-Precision Price from CoinGecko
+            fetch(`https://api.coingecko.com{fiat.toLowerCase()}`)
+                .then(res => res.json())
+                .then(data => {
+                    const price = data.digibyte[fiat.toLowerCase()];
+                    const priceBox = document.getElementById('status-btc-price');
+                    if (priceBox && price) {
+                        priceBox.innerText = `${coin} $${price.toFixed(4)} ${fiat}`;
+                    }
+                });
+
+            // Replace any "BTC" labels that the backend refresh might inject
+            document.querySelectorAll('.card .label, .card .value').forEach(el => {
+                if (el.innerHTML.includes("BTC")) {
+                    el.innerHTML = el.innerHTML.replace(/BTC/g, coin);
+                }
+            });
+        };
+
+        // Watch for updates and immediately fix
+        new MutationObserver(fixAltcoinUI).observe(document.body, { childList: true, subtree: true });
+        fixAltcoinUI();
+    });
+</script>
 {{end}}
+{{end}}
+

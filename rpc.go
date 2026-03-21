@@ -585,10 +585,12 @@ func fetchPayoutScript(_ *RPCClient, addr string) ([]byte, error) {
 		return nil, fmt.Errorf("PAYOUT_ADDRESS env var is required for coinbase outputs")
 	}
 
-	params := ChainParams()
-	script, err := scriptForAddress(addr, params)
+	// Call with new ChainParams
+	script, err := scriptForAddress(addr, ChainParams())
+
 	if err != nil {
 		return nil, fmt.Errorf("invalid payout address %s: %w", addr, err)
 	}
 	return script, nil
 }
+

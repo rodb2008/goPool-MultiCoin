@@ -30,6 +30,7 @@ type Config struct {
 	StatusTLSAddr string
 
 	// Branding.
+	CoinSymbol                      string
 	StatusBrandName                 string
 	StatusBrandDomain               string
 	StatusPublicURL                 string // canonical URL for redirects/cookies
@@ -196,6 +197,7 @@ type EffectiveConfig struct {
 	ListenAddr                        string   `json:"listen_addr"`
 	StatusAddr                        string   `json:"status_addr"`
 	StatusTLSAddr                     string   `json:"status_tls_listen,omitempty"`
+	CoinSymbol                        string   `json:"coin_symbol"`
 	StatusBrandName                   string   `json:"status_brand_name,omitempty"`
 	StatusBrandDomain                 string   `json:"status_brand_domain,omitempty"`
 	StatusTagline                     string   `json:"status_tagline,omitempty"`

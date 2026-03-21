@@ -14,6 +14,7 @@ func buildBaseFileConfig(cfg Config) baseFileConfig {
 			StatusPublicURL: cfg.StatusPublicURL,
 		},
 		Branding: brandingConfig{
+			CoinSymbol:                      cfg.CoinSymbol,
 			StatusBrandName:                 cfg.StatusBrandName,
 			StatusBrandDomain:               cfg.StatusBrandDomain,
 			StatusTagline:                   cfg.StatusTagline,
@@ -196,6 +197,7 @@ func (cfg Config) Effective() EffectiveConfig {
 		StatusBrandName:                   cfg.StatusBrandName,
 		StatusBrandDomain:                 cfg.StatusBrandDomain,
 		StatusTagline:                     cfg.StatusTagline,
+		CoinSymbol:                        cfg.CoinSymbol,
 		FiatCurrency:                      cfg.FiatCurrency,
 		PoolDonationAddress:               cfg.PoolDonationAddress,
 		DiscordURL:                        cfg.DiscordURL,

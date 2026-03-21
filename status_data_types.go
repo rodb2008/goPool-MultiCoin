@@ -27,6 +27,7 @@ type StatusData struct {
 	ClerkPublishableKey             string                `json:"-"`
 	ClerkJSURL                      string                `json:"-"`
 	SavedWorkers                    []SavedWorkerEntry    `json:"saved_workers,omitempty"`
+	CoinSymbol			string		      `json:"coin_symbol"`
 	BrandName                       string                `json:"brand_name"`
 	BrandDomain                     string                `json:"brand_domain"`
 	Tagline                         string                `json:"tagline,omitempty"`

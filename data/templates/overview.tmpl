@@ -487,7 +487,7 @@
 
 		function formatBTCShort(sats) {
 			const btc = (Number(sats) || 0) / 1e8;
-			return `${btc.toFixed(8)} BTC`;
+			return `${btc.toFixed(8)} BTC'}`;
 		}
 
 		function shortWallet(value) {
@@ -952,27 +952,30 @@
 		}
 
 		function renderTemplateTxFees() {
-			if (!templateTxFeesEl) {
-				return;
-			}
-				if (typeof templateTxFeesSats !== 'number' || templateTxFeesSats < 0) {
-					templateTxFeesEl.textContent = '--';
-					if (templateTxFeesUpdatedEl) {
-						templateTxFeesUpdatedEl.textContent = 'Updated --';
-					}
-					return;
-				}
-			const btcText = formatBTCShort(templateTxFeesSats);
-			const currency = normalizeFiatCurrency(window.fiatCurrency || FIAT_CURRENCY);
-			const priceFiat = Number(window.btcPriceFiat ?? 0);
-			const fiatText = priceFiat > 0 ? formatFiat((Number(templateTxFeesSats) / 1e8) * priceFiat, currency) : null;
-			templateTxFeesEl.innerHTML = fiatText
-				? `${btcText}<br><span style="opacity:0.7; font-size:0.85em;">(${fiatText} ${currency})</span>`
-				: btcText;
-			if (templateTxFeesUpdatedEl) {
-				const ago = formatTimeAgoMillis(templateUpdatedAtMillis);
-				templateTxFeesUpdatedEl.textContent = ago ? `Updated ${ago}` : 'Updated --';
-			}
+		    if (!templateTxFeesEl) {
+		        return;
+		    }
+		    if (typeof templateTxFeesSats !== 'number' || templateTxFeesSats < 0) {
+		        templateTxFeesEl.textContent = '--';
+		        return;
+		    }
+
+		    // 1. btcText now uses your Go 'formatBTCShort' (e.g., "268.19 DGB")
+		    const btcText = formatBTCShort(templateTxFeesSats);
+		    const currency = normalizeFiatCurrency(window.fiatCurrency || FIAT_CURRENCY);
+		    const priceFiat = Number(window.btcPriceFiat ?? 0);
+    
+		    // 2. fiatText calculates the value using your new PriceService (DGB or $0.0121 BTCS)
+		    const fiatText = priceFiat > 0 ? formatFiat((Number(templateTxFeesSats) / 1e8) * priceFiat, currency) : null;
+
+		    templateTxFeesEl.innerHTML = fiatText
+		        ? `${btcText}<br><span style="opacity:0.7; font-size:0.85em;">(${fiatText} ${currency})</span>`
+		        : btcText;
+
+		    if (templateTxFeesUpdatedEl) {
+		        const ago = formatTimeAgoMillis(templateUpdatedAtMillis);
+		        templateTxFeesUpdatedEl.textContent = ago ? `Updated ${ago}` : 'Updated --';
+		    }
 		}
 
 		function formatDurationDetailed(seconds) {

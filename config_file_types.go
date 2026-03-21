@@ -8,6 +8,7 @@ type serverConfig struct {
 }
 
 type brandingConfig struct {
+	CoinSymbol                      string `toml:"coin_symbol"`
 	StatusBrandName                 string `toml:"status_brand_name"`
 	StatusBrandDomain               string `toml:"status_brand_domain"`
 	StatusTagline                   string `toml:"status_tagline"`
@@ -21,6 +22,7 @@ type brandingConfig struct {
 // brandingConfigRead includes legacy fields that used to live under [branding]
 // in config.toml before services.toml was introduced.
 type brandingConfigRead struct {
+	CoinSymbol                      string `toml:"coin_symbol"`
 	StatusBrandName                 string `toml:"status_brand_name"`
 	StatusBrandDomain               string `toml:"status_brand_domain"`
 	StatusTagline                   string `toml:"status_tagline"`
@@ -288,3 +290,4 @@ type secretsConfig struct {
 	BackblazeAccountID      string `toml:"backblaze_account_id"`
 	BackblazeApplicationKey string `toml:"backblaze_application_key"`
 }
+

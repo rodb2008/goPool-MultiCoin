@@ -3,6 +3,7 @@ package main
 import (
 	"sync"
 	"strings"
+	"fmt"
 
 	"github.com/btcsuite/btcd/chaincfg"
 )
@@ -45,6 +46,14 @@ var (
 
 )
 
+func init() {
+	// Register these so btcutil knows how to decode them
+	_ = chaincfg.Register(&DGBParams)
+	_ = chaincfg.Register(&BTCSParams)
+	_ = chaincfg.Register(&BCHParams)
+	_ = chaincfg.Register(&BC2Params)
+}
+
 
 // SetChainParams selects the active Bitcoin network parameters used for local
 // address validation. It should be called once during startup, after CLI
@@ -52,6 +61,9 @@ var (
 func SetChainParams(network string) {
 	chainParamsMu.Lock()
 	defer chainParamsMu.Unlock()
+
+	network = strings.ToLower(network)
+	fmt.Printf("DEBUG: Activating Network Parameters for: %s\n", network)
 
 	// Convert to lowercase to handle "BTCS" or "btcs" correctly
 	network = strings.ToLower(network)
@@ -84,3 +96,4 @@ func ChainParams() *chaincfg.Params {
 	defer chainParamsMu.RUnlock()
 	return chainParams
 }
+

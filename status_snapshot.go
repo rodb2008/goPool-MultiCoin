@@ -670,6 +670,7 @@ func formatLatencyMS(ms float64) string {
 // buildTemplateFuncs returns the template.FuncMap used for all HTML templates.
 func buildTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
+		"ToUpper": strings.ToUpper,
 		"humanDuration": func(d time.Duration) string {
 			if d < 0 {
 				return "0s"
@@ -784,8 +785,9 @@ func buildTemplateFuncs() template.FuncMap {
 			return fmt.Sprintf("%.2f %s", val, unit)
 		},
 		"formatBTCShort": func(sats int64) string {
-			btc := float64(sats) / 1e8
-			return fmt.Sprintf("%.8f BTC", btc)
+		    // Just return the number. We'll handle the "DGB/BTC" label in the .tmpl files.
+		    btc := float64(sats) / 1e8
+		    return fmt.Sprintf("%.8f", btc)
 		},
 		"formatFiat": func(sats int64, price float64, currency string) string {
 			if sats == 0 || price <= 0 {

@@ -19,6 +19,7 @@
 #
 
 [branding]
+  coin_symbol = ""
   fiat_currency = "usd"
   pool_donation_address = "OPTIONAL_POOL_DONATION_WALLET"
   server_location = ""

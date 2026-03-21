@@ -425,6 +425,11 @@ func (s *StatusServer) buildStatusData() StatusData {
 	}
 	brandDomain := strings.TrimSpace(s.Config().StatusBrandDomain)
 
+	coinSymbol := s.Config().CoinSymbol
+	if coinSymbol == "" {
+		coinSymbol = "DGB" // Professional fallback for your node
+	}
+
 	activeMiners := 0
 	if s.jobMgr != nil {
 		activeMiners = s.jobMgr.ActiveMiners()
@@ -530,6 +535,7 @@ func (s *StatusServer) buildStatusData() StatusData {
 		ConnectMinerTitleExtraURL:      strings.TrimSpace(s.Config().StatusConnectMinerTitleExtraURL),
 		ServerLocation:                 s.Config().ServerLocation,
 		FiatCurrency:                   s.Config().FiatCurrency,
+		CoinSymbol:                     coinSymbol,
 		BTCPriceFiat:                   btcPrice,
 		BTCPriceUpdatedAt:              btcPriceUpdated,
 		PoolDonationAddress:            s.Config().PoolDonationAddress,

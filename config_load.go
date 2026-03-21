@@ -221,6 +221,9 @@ func applyBaseConfig(cfg *Config, fc baseFileConfigRead) (configChanged bool, mi
 	if fc.Server.StatusPublicURL != "" {
 		cfg.StatusPublicURL = strings.TrimSpace(fc.Server.StatusPublicURL)
 	}
+	if fc.Branding.CoinSymbol != "" {
+		cfg.CoinSymbol = fc.Branding.CoinSymbol
+	}
 	if fc.Branding.StatusBrandName != "" {
 		cfg.StatusBrandName = fc.Branding.StatusBrandName
 	}

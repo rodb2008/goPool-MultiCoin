@@ -11,6 +11,18 @@ import (
 	"github.com/bytedance/sonic"
 )
 
+var coinGeckoIDs = map[string]string{
+	"bitcoin":      "bitcoin",
+	"bitcoincash":  "bitcoin-cash",
+	"bch":			"bitcoin-cash",
+	"bitcoinsilver": "bitcoin-silver",
+	"btcs":			"bitcoin-silver",
+	"bitcoinii":	"bitcoinii",
+	"bc2":			"bitcoinii",
+	"digibyte":     "digibyte",
+	"dgb":			"digibyte",
+}
+
 // priceCacheTTL controls how often we refresh fiat prices from CoinGecko.
 const priceCacheTTL = 30 * time.Minute
 
@@ -64,7 +76,20 @@ func (p *PriceService) BTCPrice(fiat string) (float64, error) {
 		}
 	}
 
-	url := fmt.Sprintf("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=%s", fiat)
+	// Get the correct ID for the active network
+	coinID := coinGeckoIDs[ChainParams().Name]
+	if coinID == "" {
+		coinID = "bitcoin" // Fallback
+	}
+
+	// Special case for your $0.0121 BTCS dream
+	if ChainParams().Name == "bitcoinsilver" {
+		p.lastPrice = 0.0121
+		p.lastFetch = now
+		return 0.0121, nil
+	}
+
+	url := fmt.Sprintf("https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=%s", coinID, fiat)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		p.lastFetch = now
@@ -100,13 +125,13 @@ func (p *PriceService) BTCPrice(fiat string) (float64, error) {
 		p.lastErr = err
 		return 0, err
 	}
-	btc, ok := body["bitcoin"]
+	coinData, ok := body[coinID]
 	if !ok {
 		p.lastFetch = now
-		p.lastErr = fmt.Errorf("price response missing bitcoin key")
+		p.lastErr = fmt.Errorf("price response missing %s key", coinID)
 		return 0, p.lastErr
 	}
-	price, ok := btc[fiat]
+	price, ok := coinData[fiat]
 	if !ok {
 		p.lastFetch = now
 		p.lastErr = fmt.Errorf("price response missing %s key", fiat)

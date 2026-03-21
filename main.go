@@ -238,7 +238,13 @@ func main() {
 	case overrides.signet:
 		SetChainParams("signet")
 	default:
-		SetChainParams("mainnet")
+        // ONLY set to mainnet if no network was provided at the top
+        if network == "" {
+             SetChainParams("mainnet")
+        } else {
+            // Keep the one we already set (dgb, btcs, etc.)
+            SetChainParams(network)
+        }
 	}
 
 	// Derive a concise coinbase tag like "/goPool/" or "/<prefix>-goPool/",
