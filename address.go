@@ -21,16 +21,16 @@ func scriptForAddress(addr string, params *chaincfg.Params) ([]byte, error) {
 		return nil, errors.New("empty address")
 	}
 
-	// 1. DGB MANUAL BYPASS: If it's a DigiByte SegWit address, we handle it ourselves
-	if strings.HasPrefix(addr, "dgb1") {
+	// 1. DYNAMIC BECH32 BYPASS (Supports bc1, dgb1, ltc1, etc.)
+	// We "sniff" the prefix (HRP) from the address itself.
+	if strings.Contains(addr, "1") {
 		hrp, data, err := bech32.Decode(addr)
-		if err == nil && hrp == "dgb" {
-			// data[0] is the witness version (usually 0 for dgb1q)
+		if err == nil && hrp != "" {
+			// Extract witness version and program
 			ver := data[0]
-			// Convert the 5-bit Bech32 data back to standard 8-bit bytes
 			prog, err := bech32.ConvertBits(data[1:], 5, 8, false)
 			if err == nil {
-				// Create the Segwit ScriptPubKey: [version] [len] [program]
+				// Manually build the ScriptPubKey: [version] [len] [program]
 				script := make([]byte, 0, 2+len(prog))
 				if ver == 0 {
 					script = append(script, 0x00)
@@ -44,21 +44,25 @@ func scriptForAddress(addr string, params *chaincfg.Params) ([]byte, error) {
 		}
 	}
 
-	// 2. STANDARD LOGIC: For Bitcoin (bc1, 1, 3) or DGB Legacy (D, S)
-	// We try the standard library. If it still says "unknown format" for DGB,
-	// we force the prefix and try one more time.
+	// 2. FALLBACK TO STANDARD LOGIC (For Base58 like '1', '3', 'D', 'S')
+	// We try the standard library. If it fails for a Bech32 address,
+	// we force the detected prefix and try one more time.
 	addrDecoded, err := btcutil.DecodeAddress(addr, params)
-	if err != nil && strings.HasPrefix(addr, "dgb1") {
-		lp := *params
-		lp.Bech32HRPSegwit = "dgb"
-		addrDecoded, err = btcutil.DecodeAddress(addr, &lp)
+	if err != nil && strings.Contains(addr, "1") {
+		if parts := strings.Split(addr, "1"); len(parts) > 1 {
+			lp := *params
+			lp.Bech32HRPSegwit = parts[0] // Set HRP to 'dgb', 'bc', etc.
+			addrDecoded, err = btcutil.DecodeAddress(addr, &lp)
+		}
 	}
 
 	if err != nil {
 		return nil, fmt.Errorf("decode address: %w", err)
 	}
 
-	if !addrDecoded.IsForNet(params) && !strings.HasPrefix(addr, "dgb1") {
+	// 3. Validation: Does the address math match the network?
+	// This ensures you can't mine with a BTC address on a DGB pool.
+	if !addrDecoded.IsForNet(params) {
 		return nil, fmt.Errorf("address %s is not valid for %s", addr, params.Name)
 	}
 

@@ -4,6 +4,7 @@ import (
 	"sync"
 	"strings"
 	"fmt"
+	"time"
 
 	"github.com/btcsuite/btcd/chaincfg"
 )
@@ -13,6 +14,10 @@ var (
 	BCHParams = (func() chaincfg.Params {
 		p := chaincfg.MainNetParams
 		p.Name = "bitcoincash"
+		p.PubKeyHashAddrID = 0x00 // Starts with '1' (Legacy)
+		p.ScriptHashAddrID = 0x05 // Starts with '3' (Legacy)
+		p.Bech32HRPSegwit = "bitcoincash" // The prefix for CashAddr
+		p.TargetTimePerBlock = 10 * time.Minute
 		return p
 	})()
 	
@@ -20,6 +25,10 @@ var (
 	BTCSParams = (func() chaincfg.Params {
 		p := chaincfg.MainNetParams
 		p.Name = "bitcoinsilver"
+		p.PubKeyHashAddrID = 0x00
+		p.ScriptHashAddrID = 0x05
+		p.Bech32HRPSegwit = "bc"
+		p.TargetTimePerBlock = 30 * time.Second
 		// BTCS typically uses BTC prefixes but requires its own name for validation
 		return p
 	})()
@@ -31,6 +40,7 @@ var (
 		p.PubKeyHashAddrID = 0x1E // Starts with 'D'
 		p.ScriptHashAddrID = 0x3F // Starts with '3'
 		p.Bech32HRPSegwit = "dgb" // Starts with 'dgb1'
+		p.TargetTimePerBlock = 15 * time.Second
 		return p
 	})()
 
@@ -38,6 +48,10 @@ var (
 	BC2Params = (func() chaincfg.Params {
 		p := chaincfg.MainNetParams
 		p.Name = "bitcoin2"
+		p.PubKeyHashAddrID = 0x00 // Typically matches BTC legacy
+		p.ScriptHashAddrID = 0x05
+		p.Bech32HRPSegwit = "bc"   // Most forks keep 'bc' unless they diverge
+		p.TargetTimePerBlock = 1 * time.Minute
 		return p
 	})()
 	
