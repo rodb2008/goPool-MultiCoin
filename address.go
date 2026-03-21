@@ -21,20 +21,48 @@ func scriptForAddress(addr string, params *chaincfg.Params) ([]byte, error) {
 		return nil, errors.New("empty address")
 	}
 
+	// 1. DGB MANUAL BYPASS: If it's a DigiByte SegWit address, we handle it ourselves
+	if strings.HasPrefix(addr, "dgb1") {
+		hrp, data, err := bech32.Decode(addr)
+		if err == nil && hrp == "dgb" {
+			// data[0] is the witness version (usually 0 for dgb1q)
+			ver := data[0]
+			// Convert the 5-bit Bech32 data back to standard 8-bit bytes
+			prog, err := bech32.ConvertBits(data[1:], 5, 8, false)
+			if err == nil {
+				// Create the Segwit ScriptPubKey: [version] [len] [program]
+				script := make([]byte, 0, 2+len(prog))
+				if ver == 0 {
+					script = append(script, 0x00)
+				} else {
+					script = append(script, 0x50+ver) // version 1-16 = 0x51-0x60
+				}
+				script = append(script, byte(len(prog)))
+				script = append(script, prog...)
+				return script, nil
+			}
+		}
+	}
+
+	// 2. STANDARD LOGIC: For Bitcoin (bc1, 1, 3) or DGB Legacy (D, S)
+	// We try the standard library. If it still says "unknown format" for DGB,
+	// we force the prefix and try one more time.
 	addrDecoded, err := btcutil.DecodeAddress(addr, params)
+	if err != nil && strings.HasPrefix(addr, "dgb1") {
+		lp := *params
+		lp.Bech32HRPSegwit = "dgb"
+		addrDecoded, err = btcutil.DecodeAddress(addr, &lp)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("decode address: %w", err)
 	}
 
-	if !addrDecoded.IsForNet(params) {
+	if !addrDecoded.IsForNet(params) && !strings.HasPrefix(addr, "dgb1") {
 		return nil, fmt.Errorf("address %s is not valid for %s", addr, params.Name)
 	}
 
-	script, err := txscript.PayToAddrScript(addrDecoded)
-	if err != nil {
-		return nil, fmt.Errorf("pay to addr script: %w", err)
-	}
-	return script, nil
+	return txscript.PayToAddrScript(addrDecoded)
 }
 
 // scriptToAddress attempts to derive a human-readable Bitcoin address from a
@@ -85,11 +113,17 @@ func scriptToAddress(script []byte, params *chaincfg.Params) string {
 			return ""
 		}
 		data := append([]byte{ver}, progData...)
+		// Determine the correct prefix for the dashboard display
+		hrp := params.Bech32HRPSegwit
+		if params.Name == "digibyte" {
+			hrp = "dgb"
+		}
+
 		var addr string
 		if ver == 0 {
-			addr, err = bech32.Encode(params.Bech32HRPSegwit, data)
+			addr, err = bech32.Encode(hrp, data)
 		} else {
-			addr, err = bech32.EncodeM(params.Bech32HRPSegwit, data)
+			addr, err = bech32.EncodeM(hrp, data)
 		}
 		if err != nil {
 			return ""

@@ -73,12 +73,16 @@ func SetChainParams(network string) {
 		chainParams = &chaincfg.MainNetParams
 	case "bch", "bitcoincash":
 		chainParams = &BCHParams
+		_ = chaincfg.Register(chainParams) // Register BCH prefixes
 	case "btcs", "bitcoinsilver":
 		chainParams = &BTCSParams
+		_ = chaincfg.Register(chainParams) // Register BTCS prefixes
 	case "dgb", "digibyte":
 		chainParams = &DGBParams
+		_ = chaincfg.Register(chainParams) // Register DGB (dgb1) prefixes
 	case "bc2", "bitcoin2":
 		chainParams = &BC2Params
+		_ = chaincfg.Register(chainParams) // Register BC2 prefixes
 	case "testnet", "testnet3":
 		chainParams = &chaincfg.TestNet3Params
 	case "regtest", "regressiontest":
